@@ -1,0 +1,103 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 700px;
+    margin: 0;
+    background-color: #001330;
+}
+
+canvas {
+    border: 1px solid #ccc;
+}
+
+video {
+    position: flex;
+    margin: 1%;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    display: none;
+}
+
+#fever {
+    position: flex;
+    margin: 1%;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    display: none;
+}
+
+#score {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-size: 20px;
+}
+
+#START {
+    position: absolute;
+    top: 85%;
+    /* 上端から50%の位置に配置 */
+    left: 50%;
+    /* 左端から50%の位置に配置 */
+    transform: translate(-50%, -50%);
+    /* 中央揃え */
+    display: block;
+    width: 130px;
+    height: 130px;
+    cursor: pointer;
+    z-index: 1;
+}
+
+#retryButton {
+    position: absolute;
+    left: 5%;
+    /* 右端から10%の位置に配置 */
+    bottom: 10%;
+    /* 下端から10%の位置に配置 */
+
+    display: block;
+    background-color: #4CAF50;
+   
+    border: none;
+    color: white;
+    padding: 12px 28px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    transition-duration: 0.4s;
+}
+
+#retryButton:hover {
+    background-color: white;
+    color: black;
+}
+
+#startpage {
+    position: absolute;
+    top: 50%;
+    /* 上端から50%の位置に配置 */
+    left: 50%;
+    /* 左端から50%の位置に配置 */
+    transform: translate(-50%, -50%);
+    /* 中央揃え */
+    display: block;
+    width: 70%;
+    height: 70%;
+    color: white;
+    text-align: center;
+    font-size: 20px;
+}
+
+#game {
+    display: none;
+}
+#over{
+    display: none;
+}
