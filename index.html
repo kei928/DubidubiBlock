@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="style.css" />
+    <script>
+
+        let ctx, timer, keymap = [], blocks = [], paddle, ball;
+        let speed = 5, message = "";
+        let theta = 260 + Math.floor(Math.random() * 20);//ボールの進行方向
+        let score = 0;
+        let timeId;
+        let hitCount = 0;
+        function deg2rad(val) { return Math.PI * val / 180; }//角度をラジアンに変換
+
+        function Cube(x, y, z, w, h, d, color) {//立方体の定義
+            this.x = x;
+            this.y = y;
+            this.w = w;
+            this.h = h;
+            this.pos = []
+            this.color = color;
+
+            this.vertices = [//立方体の頂点の定義
+                { x: x - w, y: y - h, z: z + d },
+                { x: x - w, y: y + h, z: z + d },
+                { x: x + w, y: y + h, z: z + d },
+                { x: x + w, y: y - h, z: z + d },
+                { x: x - w, y: y - h, z: z - d },
+                { x: x - w, y: y + h, z: z - d },
+                { x: x + w, y: y + h, z: z - d },
+                { x: x + w, y: y - h, z: z - d },
+            ];
+
+            this.polygons = [//立方体の面の定義
+                [2, 1, 5, 6],
+                [0, 1, 2, 3],
+                [4, 5, 1, 0],
+                [2, 6, 7, 3],
+                [7, 6, 5, 4],
+                [0, 3, 7, 4]
+            ];
+
+            this.rotateXY = function (radX, radY) {
+                for (let i = 0; i < this.vertices.length; i++) {
+                    let c = this.vertices[i];
+                    let x = c.x, y = c.y, z = c.z;
+
+
+                    let p = x;
+                    let q = y * Math.cos(radX)
+                        - z * Math.sin(radX);
+                    let r = y * Math.sin(radX)
+                        + z * Math.cos(radX);
+
+
+                    x = p * Math.cos(radY)
+                        + r * Math.sin(radY);
+                    y = q;
+                    z = -p * Math.sin(radY)
+                        + r * Math.cos(radY);
+                    this.pos[i] = { x: x, y: y, z: z };
+                }
+
+            };
+
+            this.ishit = function (x, y) {
+                return this.x - this.w < x && x < this.x + this.w &&
+                    this.y - this.h < y && y < this.y + this.h;
+            };
+
+            this.translate = function (dx, dy) {
+                this.x += dx;
+                this.y += dy;
+
+                for (let i = 0; i < this.vertices.length; i++) {
+                    this.vertices[i].x += dx;
+                    this.vertices[i].y += dy;
+                }
+            };
+        }
+
+
+
+
+        function init() {
+            ctx = document.getElementById("field").getContext("2d");
+            ctx.font = "20pt Arial";
+
+            let colors = ['red', 'orange', 'yellow',
+                'green', 'purple', 'blue'];
+            for (let y = 0; y < colors.length; y++) {
+                for (let x = -3; x < 4; x++) {
+                    let b = new Cube(x * 70, y * 50 + 450, 0,
+                        30, 10, 5, colors[y]);
+                    blocks.push(b);
+                }
+            }
+
+            paddle = new Cube(0, 0, 0, 30, 10, 5, "white");
+            blocks.push(paddle);
+
+            ball = new Cube(0, 400, 0, 5, 5, 5, "yellow");
+            blocks.push(ball);
+
+            onkeydown = function (e) { keymap[e.keyCode] = true; }
+            onkeyup = function (e) { keymap[e.keyCode] = false; }
+
+
+        }
+
+        function go() {
+            document.getElementById("game").style.display = "block";
+            document.getElementById("startpage").style.display = "none";
+            document.getElementById("video").style.display = "block";
+            document.getElementById("video").play();
+            document.getElementById("video").volume = 0.5;
+            timer = setInterval(tick, 20)
+        }
+        function updateScore() {
+            score += Math.pow(2, hitCount - 1);
+            document.getElementById("score").innerHTML = "SCORE: " + score;
+        }
+        function tick() {
+            if (keymap[37]) { if (paddle.x > -250) paddle.translate(-5, 0) }
+            if (keymap[39]) { if (paddle.x < +250) paddle.translate(5, 0) }
+
+
+            let radY = paddle.x / 1000;
+            let radX = 0.5 + ball.y / 2000;
+            blocks.forEach(function (b) { b.rotateXY(radX, radY) });
+
+
+            let dx = Math.cos(deg2rad(theta)) * speed;
+            let dy = Math.sin(deg2rad(theta)) * speed;
+            ball.translate(dx, dy);
+
+
+            let count = blocks.length;
+            blocks = blocks.filter(function (b) {
+                return b == ball || b == paddle || !b.ishit(ball.x, ball.y);
+                updateScore();
+
+            });
+            if (blocks.length != count) {//ボールがブロックに当たった場合
+                theta = -theta;
+                hitCount++;
+                speed += 0.15;
+                updateScore();//スコアの更新
+
+                video.style.display = "none";
+                document.getElementById("video").pause();
+
+                let fever = document.getElementById("fever");
+                fever.style.display = "block";
+                fever.play();
+                fever.volume = 0.5;
+
+                if (timeId > 0) {//前回のタイマーをクリア
+                    clearTimeout(timeId);
+
+                };
+
+                timeId = setTimeout(function () {//ノリノリ状態を解除
+                    fever.pause();
+                    fever.style.display = "none";
+                    video.style.display = "block";
+                    video.play();
+                }, 1000);
+            } else if (paddle.ishit(ball.x, ball.y)) {
+                theta = -theta;
+                hitCount = 0;
+            }
+
+            if (blocks.length == 2) {//ボールとパドル以外のブロックがなくなった場合
+                if (timeId > 0) {//前回のタイマーをクリア
+                    clearTimeout(timeId);
+
+                };
+                stop("CLEARED")
+                fever.pause();
+                fever.style.display = "none";
+                document.getElementById("yonezu").volume = 0.5;
+                document.getElementById("yonezu").style.display = "block";
+                document.getElementById("yonezu").play();
+            }
+
+            if (ball.y > 800) {   //ボールが上の壁に当たった場合
+                theta = -theta;
+
+            }
+            if (ball.y < -200) {//ボールが画面外に出た場合
+                stop("GAME OVER");
+                //updateHigh();
+                video.pause();
+                video.style.display = "none";
+                document.getElementById("gameover").volume = 0.3;
+                document.getElementById("gameover").style.display = "block";
+                document.getElementById("gameover").play();
+            }
+            if (ball.x < -250 || ball.x > 250) {    //ボールが左右の壁に当たった場合
+                theta = 180 - theta;
+            }
+            if (paddle.ishit(ball.x, ball.y)) {//ボールがパドルに当たった場合
+                theta = 90 + ((paddle.x - ball.x) / paddle.w) * 80;
+
+
+            }
+
+            paint();
+        }
+
+
+
+        function stop(str) {
+            message = str;
+            clearInterval(timer);
+            timer = NaN;
+        }
+
+        function paint() {
+
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, 600, 600);
+
+
+            blocks.forEach(function (b) {//ブロックの描画
+                ctx.strokeStyle = b.color;
+                ctx.beginPath();
+                for (let i = 0; i < b.polygons.length; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        let index = b.polygons[i][j];
+                        let v = b.pos[index];
+                        let x = v.x / (v.z + 500) * 500 + 300;
+                        let y = -v.y / (v.z + 500) * 500 + 500;
+                        if (j == 0) {
+                            ctx.moveTo(x, y);
+                        } else {
+                            ctx.lineTo(x, y);
+                        }
+                    }
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+            })
+
+            if (isNaN(timer)) {//ゲームオーバー時のメッセージ
+                
+                ctx.fillStyle = "yellow";
+
+                ctx.fillText(message, 220, 250);
+
+
+            }
+        }
+        function updateHigh() {
+            const highScore = parseInt(localStorage.getItem("highScore")) || 0;
+            if (newScore > highScore) {
+                localStorage.setItem("highScore", newScore);
+                return newScore;
+            }
+            return highScore;
+        }
+        function displayScore() {
+            const highScore = parseInt(localStorage.getItem("highScore")) || 0;
+            document.getElementById("highScore").innerText = `ハイスコア: ${highScore}`;
+        }
+
+        function reload() {
+            location.reload();
+        }
+        document.addEventListener("DOMContentLoaded", displayScore);
+    </script>
+</head>
+
+<body onload="init()">
+    <video id="video" src="sad.mp4" width="600" height="600" loop></video>
+    <video id="fever" src="norinori.mp4" width="600" height="600" loop></video>
+    <video id="gameover" src="over.mp4" width="600" height="600" loop></video>
+    <video id="yonezu" src="yonezu.mp4" width="600" height="600" loop></video>
+    <canvas id="field" width="600" height="600" style="width:600px; height:600px"></canvas>
+
+
+    <div id="startpage">
+        <h1>3Dブロック崩し</h1>
+        <hr>
+
+        <p>左右の矢印キーでパドルが動くよ!</p>
+        <p>全てのブロックを消すとクリア</p>
+        <p>ブロックを消すと一定時間猫がノリノリになるよ!</p>
+        <p>ノリノリを継続させるとスコアがアップ!</p>
+        <p>スタートボタンを押してゲームスタート!
+        </p>
+
+        <img id="START" src="start.png" onclick="go()">
+
+    </div>
+    <div id="game">
+        <div id="score">Score: 0</div>
+        <button id="retryButton" onclick="reload()">タイトルに戻る</button>
+    </div>
+</body>
+
+</html>
