@@ -9,11 +9,12 @@ body {
 
 canvas {
     border: 1px solid #ccc;
+   
 }
 
 video {
     position: flex;
-    margin: 1%;
+    margin-right:5%;
     top: 0;
     left: 0;
     z-index: -1;
@@ -22,7 +23,7 @@ video {
 
 #fever {
     position: flex;
-    margin: 1%;
+    margin-right: 5%;
     top: 0;
     left: 0;
     z-index: -1;
@@ -38,16 +39,15 @@ video {
 }
 
 #START {
-    position: absolute;
-    top: 85%;
-    /* 上端から50%の位置に配置 */
-    left: 50%;
-    /* 左端から50%の位置に配置 */
+    position: flex;
+    margin-left: 50%;
+    margin-right:50%;
+    margin-top:80px;
     transform: translate(-50%, -50%);
-    /* 中央揃え */
+
     display: block;
-    width: 130px;
-    height: 130px;
+    max-width: 140px;
+    max-height: 140px;
     cursor: pointer;
     z-index: 1;
 }
