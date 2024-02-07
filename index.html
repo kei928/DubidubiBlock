@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="style.css" />
+    <title>Dibiブロック崩し</title>
     <script>
 
         let ctx, timer, keymap = [], blocks = [], paddle, ball;
@@ -181,9 +182,9 @@
                 stop("CLEARED")
                 fever.pause();
                 fever.style.display = "none";
-                document.getElementById("yonezu").volume = 0.5;
-                document.getElementById("yonezu").style.display = "block";
-                document.getElementById("yonezu").play();
+                document.getElementById("happy").volume = 0.5;
+                document.getElementById("happy").style.display = "block";
+                document.getElementById("happy").play();
             }
 
             if (ball.y > 800) {   //ボールが上の壁に当たった場合
@@ -275,10 +276,10 @@
 </head>
 
 <body onload="init()">
-    <video id="video" src="sad.mp4" width="600" height="600" loop></video>
-    <video id="fever" src="norinori.mp4" width="600" height="600" loop></video>
-    <video id="gameover" src="over.mp4" width="600" height="600" loop></video>
-    <video id="yonezu" src="yonezu.mp4" width="600" height="600" loop></video>
+    <video id="video" src="sad.mp4" width="400" height="400" loop></video>
+    <video id="fever" src="norinori.mp4" width="400" height="400" loop></video>
+    <video id="gameover" src="over.mp4" width="400" height="400" loop></video>
+    <video id="happy" src="happy.mp4" width="400" height="400" loop></video>
     <canvas id="field" width="600" height="600" style="width:600px; height:600px"></canvas>
 
 
@@ -299,6 +300,10 @@
     <div id="game">
         <div id="score">Score: 0</div>
         <button id="retryButton" onclick="reload()">タイトルに戻る</button>
+    </div>
+</body>
+
+</html>
     </div>
 </body>
 
